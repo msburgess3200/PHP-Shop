@@ -67,7 +67,7 @@ $i = 0;
 foreach ($b as $value){
 	$it = mysql_query("SELECT * FROM `items` WHERE `id` = ". $value .";");
 	$itemlist = mysql_fetch_array($it);
-	?>
+?>
 	<tr class="item-row">
 		      <td class="item-name"><div class="delete-wpr"><div><?php echo $itemlist['name']; ?></div></div></td>
 		      <td class="description"><div><?php echo $itemlist['description']; ?></div></td>
@@ -76,12 +76,21 @@ foreach ($b as $value){
 		      <td><span class="price">$<?php echo $pr[$i]*$qty[$i]; ?></span></td>
 		  </tr>
 <?php
-$subprice = $pr[$i]*$qty[$i];
+$subprice += $pr[$i]*$qty[$i];
 	$i++;
 }
-?>	  
+$tax = $settings['tax'];
+$shipping = $settings['shipping'];
+$total = $subprice + $shipping + $tax;
+/* 
+	Transactions for Balance Due...
+ */
+$balance = mysql_query("SELECT `amount` FROM `transactions` WHERE `userid` = ". $_COOKIE['userid'] ." AND `invoice_id` = ". $id .";");
+$bal = mysql_fetch_array($balance);
+$dues = $total-$bal['amount'];
+?>
 		  <tr id="hiderow">
-		    <td colspan="5"></td>
+		    <td colspan="5">Test</td>
 		  </tr>
 		  <tr>
 		      <td colspan="2" class="blank"> </td>
@@ -90,23 +99,28 @@ $subprice = $pr[$i]*$qty[$i];
 		  </tr>
 		  <tr>
 		      <td colspan="2" class="blank"> </td>
+		      <td colspan="2" class="total-line">Shipping</td>
+		      <td class="total-value"><div id="subtotal">$<?php echo $shipping; ?></div></td>
+		  </tr>
+		  <tr>
+		      <td colspan="2" class="blank"> </td>
 		      <td colspan="2" class="total-line">Tax</td>
-		      <td class="total-value"><div id="subtotal">$0.01</div></td>
+		      <td class="total-value"><div id="subtotal">$<?php echo $tax; ?></div></td>
 		  </tr>
 		  <tr>
 		      <td colspan="2" class="blank"> </td>
 		      <td colspan="2" class="total-line">Total</td>
-		      <td class="total-value"><div id="total">$875.00</div></td>
+		      <td class="total-value"><div id="total">$<?php echo $total; ?></div></td>
 		  </tr>
 		  <tr>
 		      <td colspan="2" class="blank"> </td>
 		      <td colspan="2" class="total-line">Amount Paid</td>
-		      <td class="total-value"><div id="paid">$0.00</div></td>
+		      <td class="total-value"><div id="paid">$<?php echo $bal['amount']; ?></div></td>
 		  </tr>
 		  <tr>
 		      <td colspan="2" class="blank"> </td>
 		      <td colspan="2" class="total-line balance">Balance Due</td>
-		      <td class="total-value balance"><div class="due">$875.00</div></td>
+		      <td class="total-value balance"><div class="due">$<?php echo $dues; ?></div></td>
 		  </tr>
 		</table>
 	</div>
